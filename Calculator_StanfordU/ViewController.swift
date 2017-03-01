@@ -10,22 +10,15 @@ import UIKit
 
 class ViewController: UIViewController {
     
+    // MARK: - Interface Builder Outlets
     @IBOutlet weak var display: UILabel!
     
-    var userIsInTheMiddleOfTyping = false
+    // MARK: - Properties
+    private var brain = CalculatorBrain()
     
-    @IBAction func touchDigit(_ sender: UIButton) {
-        let digit = sender.currentTitle!
-        if userIsInTheMiddleOfTyping {
-            let textCurrentlyInDisplay = display.text!
-            display.text = textCurrentlyInDisplay + digit
-        } else {
-            display.text = digit
-            userIsInTheMiddleOfTyping = true
-        }
-    }
+    private var userIsInTheMiddleOfTyping = false
     
-    var displayValue: Double {
+    private var displayValue: Double {
         get {
             return Double(display.text!)!
         }
@@ -34,19 +27,40 @@ class ViewController: UIViewController {
         }
     }
     
-    private var brain: CalculatorBrain = CalculatorBrain()
+    // MARK: - IBActions
+    
+    @IBAction func touchDigit(_ sender: UIButton) {
+        let digit = sender.currentTitle!
+        if userIsInTheMiddleOfTyping {
+            let textCurrentlyInDisplay = display.text!
+            // Implements legal floating point input
+            if digit != "." || !textCurrentlyInDisplay.contains(".") {
+                display.text = textCurrentlyInDisplay + digit
+            }
+        } else {
+            if digit == "." {
+                display.text = "0."
+            } else {
+                display.text = digit
+            }
+            userIsInTheMiddleOfTyping = true
+        }
+    }
     
     @IBAction func performOperation(_ sender: UIButton) {
         if userIsInTheMiddleOfTyping {
             brain.setOperand(displayValue)
             userIsInTheMiddleOfTyping = false
         }
+        
         if let mathematicalSymbol = sender.currentTitle {
             brain.performOperation(mathematicalSymbol)
         }
+        
         if let result = brain.result {
             displayValue = result
         }
+        
     }
+    
 }
-
